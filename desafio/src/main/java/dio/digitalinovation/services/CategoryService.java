@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import dio.digitalinovation.dto.CategoryDTO;
 import dio.digitalinovation.entities.Category;
 import dio.digitalinovation.repositories.CategoryRepository;
 import jakarta.transaction.Transactional;
@@ -18,30 +19,33 @@ public class CategoryService {
 	private CategoryRepository repository;
 
 	@Transactional
-	public List<Category> findAll() {
-		return repository.findAll();
+	public List<CategoryDTO> findAll() {
+		List<Category> list = repository.findAll();
+		return list.stream().map(x -> new CategoryDTO(x)).toList();
 	}
 	
 	@Transactional
-	public Category findById(Long id) {
-		Optional<Category> category = repository.findById(id);
-		return category.get();
+	public CategoryDTO findById(Long id) {
+		Optional<Category> obj = repository.findById(id);
+		Category entity = obj.get();
+		return new CategoryDTO(entity);
+		
 	}
 
 	@Transactional
-	public Category saveCategory(Category category) {
+	public CategoryDTO saveCategory(CategoryDTO dto) {
 		Category newCategory = new Category();
-		newCategory.setName(category.getName());
-		category = repository.save(newCategory);
-		return category;
+		newCategory.setName(dto.getName());
+		newCategory = repository.save(newCategory);
+		return new CategoryDTO(newCategory);
 	}
 	
 	@Transactional
-	public Category updateCategory(Long id, Category category) {
+	public CategoryDTO updateCategory(Long id, CategoryDTO dto) {
 		Category categ = repository.getReferenceById(id);
-		categ.setName(category.getName());
+		categ.setName(dto.getName());
 		categ = repository.save(categ);
-		return categ;
+		return new CategoryDTO(categ);
 	}
 	
 	public void deleteCategory(Long id) {

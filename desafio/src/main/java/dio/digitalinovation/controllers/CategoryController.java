@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import dio.digitalinovation.CategoryService;
 import dio.digitalinovation.entities.Category;
+import dio.digitalinovation.services.CategoryService;
 
 @RestController
 @RequestMapping(value="/categories")

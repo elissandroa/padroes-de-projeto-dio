@@ -5,11 +5,11 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import dio.digitalinovation.dto.CategoryDTO;
 import dio.digitalinovation.entities.Category;
 import dio.digitalinovation.repositories.CategoryRepository;
-import jakarta.transaction.Transactional;
 
 @Service
 public class CategoryService {
@@ -18,13 +18,13 @@ public class CategoryService {
 	@Autowired
 	private CategoryRepository repository;
 
-	@Transactional
+	@Transactional(readOnly = true)
 	public List<CategoryDTO> findAll() {
 		List<Category> list = repository.findAll();
 		return list.stream().map(x -> new CategoryDTO(x)).toList();
 	}
 	
-	@Transactional
+	@Transactional(readOnly = true)
 	public CategoryDTO findById(Long id) {
 		Optional<Category> obj = repository.findById(id);
 		Category entity = obj.get();
@@ -32,7 +32,7 @@ public class CategoryService {
 		
 	}
 
-	@Transactional
+	@Transactional(readOnly = true)
 	public CategoryDTO saveCategory(CategoryDTO dto) {
 		Category newCategory = new Category();
 		newCategory.setName(dto.getName());
@@ -40,7 +40,7 @@ public class CategoryService {
 		return new CategoryDTO(newCategory);
 	}
 	
-	@Transactional
+	@Transactional(readOnly = true)
 	public CategoryDTO updateCategory(Long id, CategoryDTO dto) {
 		Category categ = repository.getReferenceById(id);
 		categ.setName(dto.getName());

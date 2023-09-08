@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +15,9 @@ import dio.digitalinovation.entities.Category;
 import dio.digitalinovation.entities.Product;
 import dio.digitalinovation.repositories.CategoryRepository;
 import dio.digitalinovation.repositories.ProductRepository;
+import dio.digitalinovation.services.exceptions.DatabaseException;
+import dio.digitalinovation.services.exceptions.ResourseNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class ProductService {
@@ -33,7 +38,7 @@ public class ProductService {
 	@Transactional(readOnly = true)
 	public ProductDTO findById(Long id) {
 		Optional<Product> obj = repository.findById(id);
-		Product entity = obj.get();
+		Product entity = obj.orElseThrow(() -> new ResourseNotFoundException("Entity not found"));
 		return new ProductDTO(entity, entity.getCategories());
 		
 	}
@@ -49,10 +54,14 @@ public class ProductService {
 	
 	@Transactional
 	public ProductDTO updateProduct(Long id, ProductDTO dto) {
-		Product entity = repository.getReferenceById(id);
-		copyDtoToEntity(dto, entity);
-		entity = repository.save(entity);
-		return new ProductDTO(entity);
+		try {	
+			Product entity = repository.getReferenceById(id);
+			copyDtoToEntity(dto, entity);
+			entity = repository.save(entity);
+			return new ProductDTO(entity);
+		} catch(EntityNotFoundException e) {
+			throw new ResourseNotFoundException("entity not found" + id);
+		}
 	}
 	
 
@@ -71,6 +80,12 @@ public class ProductService {
 	
 	
 	public void deleteProduct(Long id) {
-		repository.deleteById(id);
+		try {
+			repository.deleteById(id);
+		} catch (EmptyResultDataAccessException e) {
+			throw new ResourseNotFoundException("entity not found" + id);
+		} catch (DataIntegrityViolationException e) {
+			throw new DatabaseException("Integrity violation");
+		}
 	}
 }
